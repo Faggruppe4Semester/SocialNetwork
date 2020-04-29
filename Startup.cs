@@ -39,7 +39,7 @@ namespace SocialNetwork
             services.AddSingleton(service => 
                 new GenericService<User>(
                     (SocialNetworkDatabaseSettings)service.GetRequiredService(typeof(ISocialNetworkDatabaseSettings)), 
-                    Configuration[nameof(SocialNetworkDatabaseSettings) + ":UserCollectionName"]) //Remember the colon, to notify the nested value of the SocialNetworkDatabaseSettings object.
+                    Configuration[nameof(SocialNetworkDatabaseSettings) + ":UserCollectionName"]) //Remember the colon, to notify the nested value of the SocialNetworkDatabaseSettings JSON object.
             ); //How to initialize GenericService as Singleton.
 
             services.AddControllers();

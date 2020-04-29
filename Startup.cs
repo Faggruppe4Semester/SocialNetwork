@@ -6,12 +6,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SocialNetwork.Areas.Database;
+using SocialNetwork.Models;
 using SocialNetwork.Services;
 
 namespace SocialNetwork
@@ -34,7 +36,11 @@ namespace SocialNetwork
             services.AddSingleton<ISocialNetworkDatabaseSettings>(sp =>
                 sp.GetRequiredService<IOptions<SocialNetworkDatabaseSettings>>().Value);
 
-            services.AddSingleton<UserService>();
+            services.AddSingleton(service => 
+                new GenericService<User>(
+                    (SocialNetworkDatabaseSettings)service.GetRequiredService(typeof(ISocialNetworkDatabaseSettings)), 
+                    Configuration[nameof(SocialNetworkDatabaseSettings) + ":UserCollectionName"]) //Remember the colon, to notify the nested value of the SocialNetworkDatabaseSettings object.
+            ); //How to initialize GenericService as Singleton.
 
             services.AddControllers();
         }

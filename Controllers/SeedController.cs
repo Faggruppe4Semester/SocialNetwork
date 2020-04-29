@@ -27,7 +27,6 @@ namespace SocialNetwork.Controllers
         [HttpPost("Users")]
         public ActionResult SeedUsers()
         {
-
             var peter = new User
             {
                 Name = "Peter Nielsen",
@@ -47,6 +46,10 @@ namespace SocialNetwork.Controllers
                 Email = "matilde@joergensen.dk"
             };
             
+            _users.InsertOne(peter);
+            _users.InsertOne(ole);
+            _users.InsertOne(matilde);
+
             return NoContent();
         }
 

@@ -7,11 +7,11 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace SocialNetwork.Models
 {
-    public class User
+    public class User : IModel
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string UserId { get; set; }
+        public string Id { get; set; }
         [BsonElement("Name")]
         public string Name { get; set; }
         public int Age { get; set; }

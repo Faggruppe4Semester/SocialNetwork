@@ -14,9 +14,9 @@ namespace SocialNetwork.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly UserService _userService;
+        private readonly GenericService<User> _userService;
 
-        public UserController(UserService userService)
+        public UserController(GenericService<User> userService)
         {
             _userService = userService;
         }
@@ -34,7 +34,7 @@ namespace SocialNetwork.Controllers
         public ActionResult<User> Create(User user)
         {
             _userService.Create(user);
-            return CreatedAtRoute("GetUser", new {id = user.UserId.ToString()}, user);
+            return CreatedAtRoute("GetUser", new {id = user.Id}, user);
         }
 
         // PUT: api/User/5
@@ -59,7 +59,7 @@ namespace SocialNetwork.Controllers
                 return NotFound();
             }
 
-            _userService.Delete(user.UserId);
+            _userService.Delete(user.Id);
 
             return NoContent();
         }

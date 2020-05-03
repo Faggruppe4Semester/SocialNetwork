@@ -16,9 +16,14 @@ namespace SocialNetwork.Models
         public string Name { get; set; }
         public int Age { get; set; }
         public string Email { get; set; }
-        public List<Circle> Circles { get; set; }
-        public List<User> BlockedUsers { get; set; }
+        //public List<Circle> Circles { get; set; }
+        public List<string> CirclesIDs { get; set; } = new List<string>();
 
+
+        //public List<User> BlockedUsers { get; set; }
+        public List<string> BlockedUserIDs { get; set; } = new List<string>();
+        public List<string> FollowedUserIDs { get; set; } = new List<string>();
+        public List<Post> Posts { get; set; } = new List<Post>();
 
     }
 }

@@ -42,6 +42,12 @@ namespace SocialNetwork
                     Configuration[nameof(SocialNetworkDatabaseSettings) + ":UserCollectionName"]) //Remember the colon, to notify the nested value of the SocialNetworkDatabaseSettings JSON object.
             ); //How to initialize GenericService as Singleton.
 
+            services.AddSingleton(service =>
+                    new GenericService<Circle>(
+                        (SocialNetworkDatabaseSettings)service.GetRequiredService(typeof(ISocialNetworkDatabaseSettings)),
+                        Configuration[nameof(SocialNetworkDatabaseSettings) + ":CircleCollectionName"])
+            );
+
             services.AddControllers();
         }
 

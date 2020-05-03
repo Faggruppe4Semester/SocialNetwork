@@ -12,10 +12,10 @@ namespace SocialNetwork.Models
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
-        public string UserId { get; set; }
-        public string Text { get; set; }
-        public Circle Circle { get; set; }
+        public string OwnerId { get; set; }
         public DateTime Created { get; set; }
-        private List<Comment> Comments { get; set; }
+        public string Text { get; set; }
+        //public Circle Circle { get; set; }
+        public List<Comment> Comments { get; set; } = new List<Comment>();
     }
 }

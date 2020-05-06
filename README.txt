@@ -1,10 +1,20 @@
+SeedController:
+
+Tilføj dummy data til databasen
+POST: https://localhost:44323/api/Seed/Users
+
+
 Usercontroller:
 
 Vis alle brugere:
 GET: https://localhost:44323/api/User
 
+
+
 Vis specifik bruger:
 GET: https://localhost:44323/api/User/BrugerID
+
+
 
 Opret ny bruger:
 POST: https://localhost:44323/api/User
@@ -18,6 +28,8 @@ BODY:
 	"FollowedUserIDs": ["FollowedUser1", "FollowedUser2"]
 }
 
+
+
 Opdater eksisterende bruger:
 PUT: https://localhost:44323/api/User/BrugerID
 BODY:
@@ -29,6 +41,8 @@ BODY:
 	"BlockedUserIDs": ["BlockedUser1", "BlockedUser2"],
 	"FollowedUserIDs": ["FollowedUser1", "FollowedUser2"]
 }
+
+
 
 Slet bruger:
 DELETE: https://localhost:44323/api/User/BrugerID
@@ -48,6 +62,8 @@ BODY:
 	}
 }
 
+
+
 Kommenter på en post:
 POST: https://localhost:44323/api/User/Comment
 BODY:
@@ -56,22 +72,33 @@ BODY:
 	"Text": "Kommentarens indhold"
 }
 
+
+
 Vis en brugers væg:
 GET: https://localhost:44323/api/User/Wall
 BODY:
 Ids: ["Brugerens Id", "Seerens Id"]
 
+
+
 Vis en brugers feed:
 GET: https://localhost:44323/api/User/BrugerID
 
 
+
 CircleController:
+
+
 
 Vis alle circles:
 GET: https://localhost:44323/api/Circle
 
+
+
 Vis en specifik circle:
 GET: https://localhost:44323/api/Circle/CircleID
+
+
 
 Opret en ny circle:
 POST: https://localhost:44323/api/Circle
@@ -81,6 +108,8 @@ BODY:
 	"MemberIDs":["BrugerID1","BrugerID2","BrugerID3"]
 }
 
+
+
 Opdater en eksisterende circle:
 PUT: https://localhost:44323/api/Circle/CircleID
 BODY:
@@ -89,13 +118,19 @@ BODY:
 	"MemberIDs":["BrugerID1","BrugerID2","BrugerID3"]
 }
 
+
+
 Slet en circle:
 DELETE: https://localhost:44323/api/Circle/CircleID
+
+
 
 Tilføj brugere til en circle
 POST: https://localhost:44323/api/Circle/AddUsers
 BODY:
-["BrugerID1","BrugerID2","BrugerID3"]
+["CircleID","BrugerID1","BrugerID2"]
+
+
 
 Tilføj en post til en eller flere circles:
 POST: https://localhost:44323/api/Circle/Post

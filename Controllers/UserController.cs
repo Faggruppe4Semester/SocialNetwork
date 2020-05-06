@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Diagnostics;
 using MongoDB.Bson;
 using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization.Serializers;
@@ -73,7 +74,7 @@ namespace SocialNetwork.Controllers
 
 
         // POST: api/User/Post/OnUser
-        [HttpPost("Post/OnUser")]
+        [HttpPost("Post")]
         public ActionResult<User> CreatePost(Post post)
         {
             
@@ -146,6 +147,55 @@ namespace SocialNetwork.Controllers
             }
             return NotFound();
 
+        }
+
+
+        //GET: api/User/Wall
+        [HttpGet("Wall")]
+        public ActionResult<List<Post>> ShowWall(List<string> Ids)
+        {
+            try
+            {
+                string userId = Ids[0];
+                string guestId = Ids[1];
+                var user = _userService.Read(u => Equals(u.Id, userId));
+                if(!user.BlockedUserIDs.Contains(guestId))
+                {
+                    var posts = user.Posts;
+                    return posts.OrderByDescending(p => p.Created).ToList().GetRange(0, posts.Count >= 10 ? 10 : posts.Count);
+                }
+                return NotFound();
+            }
+            catch (Exception e)
+            {
+                return NotFound();
+            }
+        }
+
+        //Get: api/User/Feed/UserId
+        [HttpGet("Feed/{userId}")]
+        public ActionResult<List<Post>> ShowFeed(string userId)
+        {
+            User user = _userService.Read(u => Equals(u.Id, userId));
+
+            var followedUsers = _userService.ReadList(u => user.FollowedUserIDs.Contains(u.Id) && !u.BlockedUserIDs.Contains(user.Id));
+            var followedCircles = _circleService.ReadList(c => user.CirclesIDs.Contains(c.Id));
+
+            List<Post> posts = new List<Post>();
+
+            foreach (User u in followedUsers)
+            {
+
+                posts.AddRange(u.Posts.OrderByDescending(p=>p.Created).ToList().GetRange(0, u.Posts.Count >= 10 ? 10 : u.Posts.Count));
+            }
+
+            foreach (Circle c in followedCircles)
+            {
+                posts.AddRange(c.Posts.OrderByDescending(p => p.Created).ToList().GetRange(0, c.Posts.Count >= 10 ? 10 : c.Posts.Count));
+            }
+
+            posts = posts.OrderByDescending(p => p.Created).ToList().GetRange(0, posts.Count >= 10 ? 10 : posts.Count);
+            return posts;
         }
 
     }

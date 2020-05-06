@@ -108,8 +108,8 @@ namespace SocialNetwork.Controllers
 
 
 
-        // POST: api/Circle/Post/OnCircles
-        [HttpPost("Post/OnCircles")]
+        // POST: api/Circle/Post
+        [HttpPost("Post")]
         public ActionResult<Circle> CreatePostOnCircle(CirclePost cpost)
         {
 

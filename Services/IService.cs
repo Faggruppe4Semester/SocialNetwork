@@ -21,6 +21,7 @@ namespace SocialNetwork.Services
          * _userService.Read(user => user.Id == id); //Returns the user with the initialized id.
          */
         public T Read(Expression<Func<T, bool>> filter);
+        public List<T> ReadList(Expression<Func<T, bool>> filter);
         public T Update(T obj, Expression<Func<T, bool>> filter);
         public void Delete(Expression<Func<T, bool>> filter);
 

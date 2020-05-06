@@ -31,6 +31,7 @@ namespace SocialNetwork.Services
         public List<TCollection> Read() => _collection.Find(collection => true).ToList();
         public TCollection Read(string id) => Read(model => model.Id == id); //Nested call to Read(Expression<Func<TCollection, bool>> filter)
         public TCollection Read(Expression<Func<TCollection, bool>> filter) => _collection.Find(filter).FirstOrDefault();
+        public List<TCollection> ReadList(Expression<Func<TCollection, bool>> filter) => _collection.Find(filter).ToList();
 
         /*----- UPDATE -----*/
         public TCollection Update(TCollection obj, string id) => Update(obj, model => model.Id == id); //Nested call to Update(TCollection obj, Expression<Func<TCollection, bool>> filter)

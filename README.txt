@@ -1,3 +1,5 @@
+Programmet kræver at mongo er installeret i windows - ikke i docker.
+
 SeedController:
 
 Tilføj dummy data til databasen

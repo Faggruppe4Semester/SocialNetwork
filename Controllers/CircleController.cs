@@ -20,11 +20,13 @@ namespace SocialNetwork.Controllers
     {
         private readonly GenericService<Circle> _circleService;
         private readonly GenericService<User> _userService;
+        private readonly GenericService<Post> _postService;
 
-        public CircleController(GenericService<Circle> circleService, GenericService<User> userService)
+        public CircleController(GenericService<Circle> circleService, GenericService<User> userService, GenericService<Post> postService)
         {
             _circleService = circleService;
             _userService = userService;
+            _postService = postService;
         }
 
         // GET: api/Circle
@@ -110,37 +112,28 @@ namespace SocialNetwork.Controllers
 
         // POST: api/Circle/Post
         [HttpPost("Post")]
-        public ActionResult<Circle> CreatePostOnCircle(CirclePost cpost)
+        public ActionResult<Circle> CreatePostOnCircle(Post post)
         {
 
-            var post = cpost.post;
-            var circleIds = cpost.circleIds;
-
-
-            var circles = _circleService.Read();
-
-            circles = circles.FindAll(c => circleIds.Contains(c.Id));
-
-            if (post.Id == null)
+            try
             {
+                var circles = _circleService.ReadCollection().Aggregate().Match(c => c.Id == post.CircleId);
+
+                if (post.Created.CompareTo(new DateTime(1, 1, 1)) <= 0)
+                {
+                    post.Created = DateTime.Now;
+                }
+
                 post.Id = ObjectId.GenerateNewId().ToString();
+                _postService.Create(post);
+
+                return Ok();
             }
-
-
-            if (post.Created.CompareTo(new DateTime(1, 1, 1)) <= 0)
+            catch (Exception)
             {
-                post.Created = DateTime.Now;
+
+                return Conflict();
             }
-
-
-            foreach (Circle c in circles)
-            {
-                post.OwnerId = c.Id;
-                c.Posts.Add(post);
-                _circleService.Update(c, c.Id);
-            }
-
-            return Ok();
         }
     }
 

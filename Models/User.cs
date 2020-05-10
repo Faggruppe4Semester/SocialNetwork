@@ -19,7 +19,7 @@ namespace SocialNetwork.Models
         public List<string> CirclesIDs { get; set; } = new List<string>();
         public List<string> BlockedUserIDs { get; set; } = new List<string>();
         public List<string> FollowedUserIDs { get; set; } = new List<string>();
-        public List<Post> Posts { get; set; } = new List<Post>();
+        //public List<string> PostIDs { get; set; } = new List<string>();
 
     }
 }

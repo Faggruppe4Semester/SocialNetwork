@@ -18,6 +18,7 @@ namespace SocialNetwork.Controllers
     {
         private readonly IMongoCollection<User> _users;
         private readonly IMongoCollection<Circle> _circles;
+        private readonly IMongoCollection<Post> _posts;
 
         public SeedController(ISocialNetworkDatabaseSettings settings)
         {
@@ -26,6 +27,7 @@ namespace SocialNetwork.Controllers
 
             _users = database.GetCollection<User>(settings.UserCollectionName);
             _circles = database.GetCollection<Circle>(settings.CircleCollectionName);
+            _posts = database.GetCollection<Post>(settings.PostCollectionName);
             
         }
 
@@ -35,6 +37,7 @@ namespace SocialNetwork.Controllers
             //Tøm databasen
             _users.DeleteMany(u => u.Id != null);
             _circles.DeleteMany(c => c.Id != null);
+            _posts.DeleteMany(p => p.Id != null);
 
             //Opret brugere
             var peter = new User
@@ -69,11 +72,6 @@ namespace SocialNetwork.Controllers
                 {
                     matilde.Id,
                     peter.Id
-                },
-                Posts = new List<Post>
-                {
-                    new Post{Id = ObjectId.GenerateNewId().ToString(), OwnerId = tempid, Created = new DateTime(2020,4,20),content = new Content{Text = "I dag skal vi undersøge de medicinske egenskaber af hash"}},
-                    new Post{Id = ObjectId.GenerateNewId().ToString(), OwnerId = tempid, Created = new DateTime(2019,10,25),content = new Content{Text = "Her er noterne fra idag"}}
                 }
             };
 
@@ -83,22 +81,26 @@ namespace SocialNetwork.Controllers
             peter.FollowedUserIDs.Add(matilde.Id);
 
 
-            //Tilføj posts til bruger.
+            //Tilføj posts
             #region AddPosts
-            matilde.Posts.Add(new Post 
+            _posts.InsertOne(new Post
             {
-                OwnerId=matilde.Id,
-                Created=new DateTime(2005,12,24),
-                Id= ObjectId.GenerateNewId().ToString(),
+                OwnerId = matilde.Id,
+                Public = true,
+                BlockedUserIds = matilde.BlockedUserIDs,
+                Created = new DateTime(2005, 12, 24),
+                Id = ObjectId.GenerateNewId().ToString(),
                 content = new Content
                 {
                     Text = "Glædelig jul"
                 }
             });
 
-            matilde.Posts.Add(new Post
+            _posts.InsertOne(new Post
             {
                 OwnerId = matilde.Id,
+                Public = true,
+                BlockedUserIds = matilde.BlockedUserIDs,
                 Created = new DateTime(2006, 12, 24),
                 Id = ObjectId.GenerateNewId().ToString(),
                 content = new Content
@@ -107,9 +109,11 @@ namespace SocialNetwork.Controllers
                 }
             });
 
-            matilde.Posts.Add(new Post
+            _posts.InsertOne(new Post
             {
                 OwnerId = matilde.Id,
+                Public = true,
+                BlockedUserIds = matilde.BlockedUserIDs,
                 Created = new DateTime(2007, 12, 24),
                 Id = ObjectId.GenerateNewId().ToString(),
                 content = new Content
@@ -118,9 +122,11 @@ namespace SocialNetwork.Controllers
                 }
             });
 
-            matilde.Posts.Add(new Post
+            _posts.InsertOne(new Post
             {
                 OwnerId = matilde.Id,
+                Public = true,
+                BlockedUserIds = matilde.BlockedUserIDs,
                 Created = new DateTime(2012, 12, 31),
                 Id = ObjectId.GenerateNewId().ToString(),
                 content = new Content
@@ -129,9 +135,11 @@ namespace SocialNetwork.Controllers
                 }
             });
 
-            matilde.Posts.Add(new Post
+            _posts.InsertOne(new Post
             {
                 OwnerId = matilde.Id,
+                Public = true,
+                BlockedUserIds = matilde.BlockedUserIDs,
                 Created = new DateTime(2015, 7, 5),
                 Id = ObjectId.GenerateNewId().ToString(),
                 content = new Content
@@ -142,9 +150,11 @@ namespace SocialNetwork.Controllers
                 }
             });
 
-            matilde.Posts.Add(new Post
+            _posts.InsertOne(new Post
             {
                 OwnerId = matilde.Id,
+                Public = true,
+                BlockedUserIds = matilde.BlockedUserIDs,
                 Created = new DateTime(2015, 8, 31),
                 Id = ObjectId.GenerateNewId().ToString(),
                 content = new Content
@@ -155,9 +165,11 @@ namespace SocialNetwork.Controllers
                 }
             });
 
-            matilde.Posts.Add(new Post
+            _posts.InsertOne(new Post
             {
                 OwnerId = matilde.Id,
+                Public = true,
+                BlockedUserIds = matilde.BlockedUserIDs,
                 Created = new DateTime(2015, 10, 31),
                 Id = ObjectId.GenerateNewId().ToString(),
                 content = new Content
@@ -168,9 +180,11 @@ namespace SocialNetwork.Controllers
                 }
             });
 
-            matilde.Posts.Add(new Post
+            _posts.InsertOne(new Post
             {
                 OwnerId = matilde.Id,
+                Public = true,
+                BlockedUserIds = matilde.BlockedUserIDs,
                 Created = new DateTime(2016, 1, 3),
                 Id = ObjectId.GenerateNewId().ToString(),
                 content = new Content
@@ -181,9 +195,11 @@ namespace SocialNetwork.Controllers
                 }
             });
 
-            matilde.Posts.Add(new Post
+            _posts.InsertOne(new Post
             {
                 OwnerId = matilde.Id,
+                Public = true,
+                BlockedUserIds = matilde.BlockedUserIDs,
                 Created = new DateTime(2016, 3, 3),
                 Id = ObjectId.GenerateNewId().ToString(),
                 content = new Content
@@ -194,9 +210,11 @@ namespace SocialNetwork.Controllers
                 }
             });
 
-            matilde.Posts.Add(new Post
+            _posts.InsertOne(new Post
             {
                 OwnerId = matilde.Id,
+                Public = true,
+                BlockedUserIds = matilde.BlockedUserIDs,
                 Created = new DateTime(2016, 4, 21),
                 Id = ObjectId.GenerateNewId().ToString(),
                 content = new Content
@@ -208,9 +226,11 @@ namespace SocialNetwork.Controllers
             });
 
             string temppostid = ObjectId.GenerateNewId().ToString();
-            matilde.Posts.Add(new Post
+            _posts.InsertOne(new Post
             {
                 OwnerId = matilde.Id,
+                Public = true,
+                BlockedUserIds = matilde.BlockedUserIDs,
                 Created = new DateTime(2016, 5, 30),
                 Id = temppostid,
                 content = new Content
@@ -226,9 +246,11 @@ namespace SocialNetwork.Controllers
             });
 
             temppostid = ObjectId.GenerateNewId().ToString();
-            matilde.Posts.Add(new Post
+            _posts.InsertOne(new Post
             {
                 OwnerId = matilde.Id,
+                Public = true,
+                BlockedUserIds = matilde.BlockedUserIDs,
                 Created = new DateTime(2020, 4, 21),
                 Id = temppostid,
                 content = new Content
@@ -242,14 +264,44 @@ namespace SocialNetwork.Controllers
                 }
             });
 
-            matilde.Posts.Add(new Post
+            _posts.InsertOne(new Post
             {
                 OwnerId = matilde.Id,
+                Public = true,
+                BlockedUserIds = matilde.BlockedUserIDs,
                 Created = new DateTime(1998, 4, 21),
                 Id = ObjectId.GenerateNewId().ToString(),
                 content = new Content
                 {
                     Text = "Dette er en post med en gammel dato, som er tilføjet efter nyere posts"
+                }
+            });
+
+            _posts.InsertOne(new Post
+            {
+                OwnerId = peter.Id,
+                Public = false,
+                CircleId = studiegruppen.Id,
+                BlockedUserIds = peter.BlockedUserIDs,
+                Created = new DateTime(2020,4,20),
+                Id = ObjectId.GenerateNewId().ToString(),
+                content = new Content
+                {
+                    Text =  "Her er noterne fra idag"
+                }
+            });
+
+            _posts.InsertOne(new Post
+            {
+                OwnerId = peter.Id,
+                Public = false,
+                CircleId = studiegruppen.Id,
+                BlockedUserIds = peter.BlockedUserIDs,
+                Created = new DateTime(2020, 4, 22),
+                Id = ObjectId.GenerateNewId().ToString(),
+                content = new Content
+                {
+                    Text = "Imorgen skal afleveringen afleveres"
                 }
             });
 

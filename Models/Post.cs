@@ -14,19 +14,14 @@ namespace SocialNetwork.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
         public string OwnerId { get; set; }
+        public string CircleId { get; set; }
+        public bool Public { get; set; }
         public DateTime Created { get; set; }
         public Content content { get; set; }
         public List<Comment> Comments { get; set; } = new List<Comment>();
+        public List<string> BlockedUserIds { get; set; } = new List<string>();
 
-        //public static bool operator<(Post a, Post b)
-        //{
-        //    return a.Created < b.Created ? true : false;
-        //}
 
-        //public static bool operator>(Post a, Post b)
-        //{
-        //    return a.Created > b.Created ? true : false;
-        //}
     }
 
     public class Content : TextContent, VideoContent

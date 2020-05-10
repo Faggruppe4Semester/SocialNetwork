@@ -21,11 +21,13 @@ namespace SocialNetwork.Controllers
     {
         private readonly GenericService<User> _userService;
         private readonly GenericService<Circle> _circleService;
+        private readonly GenericService<Post> _postService;
 
-        public UserController(GenericService<User> userService, GenericService<Circle> circleService)
+        public UserController(GenericService<User> userService, GenericService<Circle> circleService, GenericService<Post> postService)
         {
             _userService = userService;
             _circleService = circleService;
+            _postService = postService;
         }
 
         // GET: api/User
@@ -73,30 +75,38 @@ namespace SocialNetwork.Controllers
 
 
 
-        // POST: api/User/Post/OnUser
+        // POST: api/User/Post/
         [HttpPost("Post")]
         public ActionResult<User> CreatePost(Post post)
         {
-            
-            var user = _userService.Read(u => Equals(u.Id, post.OwnerId));
-
-
-            if (post.Id == null)
+            try
             {
-                post.Id = ObjectId.GenerateNewId().ToString();
+                var user = _userService.Read(u => Equals(u.Id, post.OwnerId));
+
+                post.BlockedUserIds = user.BlockedUserIDs;
+
+                if (post.Id == null)
+                {
+                    post.Id = ObjectId.GenerateNewId().ToString();
+                }
+
+
+                if (post.Created.CompareTo(new DateTime(1, 1, 1)) <= 0)
+                {
+                    post.Created = DateTime.Now;
+                }
+
+
+                _postService.Create(post);
+
+                return CreatedAtRoute("GetUser", new { id = user.Id }, user);
+            }
+            catch (Exception)
+            {
+
+                return Conflict();
             }
 
-
-            if (post.Created.CompareTo(new DateTime(1, 1, 1)) <= 0)
-            {
-                post.Created = DateTime.Now;
-            }
-
-
-            user.Posts.Add(post);
-            _userService.Update(user, user.Id);
-
-            return CreatedAtRoute("GetUser", new { id = user.Id }, user);
         }
 
 
@@ -108,44 +118,20 @@ namespace SocialNetwork.Controllers
 
             try
             {
-                var userlist = _userService.Read();
-                var user = userlist.Find(u => Equals(u.Id, u.Posts.Find(p => Equals(p.Id, comment.PostId)).OwnerId));
+                var parentPost = _postService.Read(comment.PostId);
 
+                if (comment.Id == null) comment.Id = ObjectId.GenerateNewId().ToString();
 
-                if (comment.Id == null)
-                {
-                    comment.Id = ObjectId.GenerateNewId().ToString();
-                }
+                parentPost.Comments.Add(comment);
 
-                user.Posts.Find(p => p.Id == comment.PostId).Comments.Add(comment);
-
-                _userService.Update(user, user.Id);
-                return CreatedAtRoute("GetUser", new { id = user.Id }, user);
+                _postService.Update(parentPost, parentPost.Id);
+                return parentPost;
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                
-            }
 
-            try
-            {
-                var circleList = _circleService.Read();
-                var circle = circleList.Find(c => Equals(c.Id, c.Posts.Find(p => Equals(p.Id, comment.PostId)).OwnerId));
-
-                if (comment.Id == null)
-                {
-                    comment.Id = ObjectId.GenerateNewId().ToString();
-                }
-
-                circle.Posts.Find(p=>p.Id==comment.PostId).Comments.Add(comment);
-                _circleService.Update(circle, circle.Id);
-                return CreatedAtRoute("GetCircle", new { id = circle.Id }, circle);
+                return Conflict();
             }
-            catch (Exception e)
-            {
-                
-            }
-            return NotFound();
 
         }
 
@@ -154,20 +140,28 @@ namespace SocialNetwork.Controllers
         [HttpGet("Wall")]
         public ActionResult<List<Post>> ShowWall(List<string> Ids)
         {
+
             try
             {
                 string userId = Ids[0];
                 string guestId = Ids[1];
-                var user = _userService.Read(u => Equals(u.Id, userId));
-                if(!user.BlockedUserIDs.Contains(guestId))
-                {
-                    var posts = user.Posts;
-                    return posts.OrderByDescending(p => p.Created).ToList().GetRange(0, posts.Count >= 10 ? 10 : posts.Count);
-                }
-                return NotFound();
+
+
+
+                var posts = _postService.ReadCollection().Aggregate()
+                    .Match(p =>
+                        p.OwnerId == userId &&
+                        p.Public == true &&
+                        !p.BlockedUserIds.Contains(guestId))
+                    .SortByDescending(p => p.Created)
+                    .Limit(10).ToList();
+
+                return posts;
+
             }
-            catch (Exception e)
+            catch (Exception)
             {
+
                 return NotFound();
             }
         }
@@ -176,26 +170,52 @@ namespace SocialNetwork.Controllers
         [HttpGet("Feed/{userId}")]
         public ActionResult<List<Post>> ShowFeed(string userId)
         {
-            User user = _userService.Read(u => Equals(u.Id, userId));
 
-            var followedUsers = _userService.ReadList(u => user.FollowedUserIDs.Contains(u.Id) && !u.BlockedUserIDs.Contains(user.Id));
-            var followedCircles = _circleService.ReadList(c => user.CirclesIDs.Contains(c.Id));
+            try
+            {
+                User user = _userService.Read(u => Equals(u.Id, userId));
+                List<Circle> circles = _circleService.Read();
+                List<Post> returnPosts = new List<Post>();
 
-            List<Post> posts = new List<Post>();
+                var posts = _postService.ReadCollection().Aggregate()
+                    .Match(p =>
+                        user.FollowedUserIDs.Contains(p.OwnerId) &&
+                        !p.BlockedUserIds.Contains(user.Id) &&
+                        p.Public == true)
+                    .SortByDescending(p => p.Created)
+                    .Limit(10)
+                    .ToList();
 
-            foreach (User u in followedUsers)
+                returnPosts.AddRange(posts);
+
+                foreach (Circle c in circles)
+                {
+                    if(c.MemberIDs.Contains(user.Id))
+                    {
+                        posts = _postService.ReadCollection().Aggregate()
+                            .Match(p => 
+                                user.CirclesIDs.Contains(p.CircleId) &&
+                                c.Id == p.CircleId &&
+                                c.MemberIDs.Contains(user.Id))
+                            .SortByDescending(p => p.Created)
+                            .Limit(10)
+                            .ToList();
+
+                        returnPosts.AddRange(posts);
+                    }
+                }
+
+
+
+                return returnPosts.OrderByDescending(p => p.Created).Take(10).ToList();
+            }
+            catch (Exception)
             {
 
-                posts.AddRange(u.Posts.OrderByDescending(p=>p.Created).ToList().GetRange(0, u.Posts.Count >= 10 ? 10 : u.Posts.Count));
+                return Conflict();
             }
 
-            foreach (Circle c in followedCircles)
-            {
-                posts.AddRange(c.Posts.OrderByDescending(p => p.Created).ToList().GetRange(0, c.Posts.Count >= 10 ? 10 : c.Posts.Count));
-            }
 
-            posts = posts.OrderByDescending(p => p.Created).ToList().GetRange(0, posts.Count >= 10 ? 10 : posts.Count);
-            return posts;
         }
 
     }

@@ -49,6 +49,12 @@ namespace SocialNetwork
                         Configuration[nameof(SocialNetworkDatabaseSettings) + ":CircleCollectionName"])
             );
 
+            services.AddSingleton(service =>
+                    new GenericService<Post>(
+                        (SocialNetworkDatabaseSettings)service.GetRequiredService(typeof(ISocialNetworkDatabaseSettings)),
+                        Configuration[nameof(SocialNetworkDatabaseSettings) + ":PostCollectionName"])
+            );
+
             services.AddControllers();
         }
 
